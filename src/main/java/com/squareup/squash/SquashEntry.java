@@ -23,10 +23,25 @@ import java.util.Map;
 
 /** An exception to be tracked in Squash (the replacement for Hoptoad, because Hoptoad is lame). */
 // All of the fields are only used for gson serialization, and so can't be made local or removed.
+/**
+ * is a Java class used to represent an exception tracked by the Squash framework.
+ * It contains various fields and methods for gson serialization and testing purposes.
+ */
 @SuppressWarnings({ "FieldCanBeLocal", "UnusedDeclaration" })
 public class SquashEntry {
   private static final String DATE_RFC_2822 = "EEE, dd MMM yyyy HH:mm:ss Z";
   private static final ThreadLocal<DateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<DateFormat>() {
+    /**
+     * returns a `DateFormat` object initialized with the RFC 2822 format string.
+     * 
+     * @returns a `DateFormat` instance initialized with the format string `DATE_RFC_2822`.
+     * 
+     * 	- The SimpleDateFormat class is used to parse and format dates in the RFC 2822 format.
+     * 	- The `new SimpleDateFormat(DATE_RFC_2822)` method creates an instance of the
+     * `SimpleDateFormat` class with the format string set to "RFC 2822".
+     * 	- This function returns a new instance of `SimpleDateFormat`, which can be used
+     * to parse and format dates in RFC 2822 format.
+     */
     @Override protected DateFormat initialValue() {
       return new SimpleDateFormat(DATE_RFC_2822);
     }
@@ -75,6 +90,27 @@ public class SquashEntry {
   }
 
   // Squash requires a non-empty message field.
+  /**
+   * generates a string message based on a provided `Throwable` error object and a log
+   * message. If both are null, it returns a default message. Otherwise, it combines
+   * the error message with the log message.
+   * 
+   * @param error error object that contains the detailed information about the error,
+   * which is used to create the final message returned by the function.
+   * 
+   * 1/ If `error` is not null and `error.getMessage()` is not null, then `error.getMessage()`
+   * is returned as the message.
+   * 2/ If `logMessage` is not null, then `logMessage` is returned as the message.
+   * 3/ If neither `error` nor `logMessage` are null, then a default message "No message"
+   * is returned.
+   * 
+   * @param logMessage 2nd string argument passed to the function, which if provided,
+   * will be used as the alternative message to display if the error parameter is null
+   * or has no message.
+   * 
+   * @returns a string representation of an error message, log message or a default
+   * message if neither is provided.
+   */
   private static String createMessage(Throwable error, String logMessage) {
     String message;
     if (error != null && error.getMessage() != null) {

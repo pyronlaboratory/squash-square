@@ -28,6 +28,32 @@ public final class SquashBacktrace {
     // Should not be instantiated: this is a utility class.
   }
 
+  /**
+   * takes a `Throwable` parameter and returns a list of `SquashException` objects
+   * representing the backtraces of the thrown exception, with each object containing
+   * the thread name, the true flag, and the stack trace array.
+   * 
+   * @param error Throwable object to be analyzed for backtraces.
+   * 
+   * 1/ If `error` is null, then `null` is returned as output.
+   * 2/ Otherwise, an instance of `SquashException` is created with the name of the
+   * current thread and a boolean flag indicating whether it is a nested exception or
+   * not.
+   * 3/ The `getStacktraceArray` function is called on the `error` object to obtain an
+   * array of stack traces for the current thread. This array is then added to the
+   * instance of `SquashException`.
+   * 
+   * @returns a list of `SquashException` objects representing the backtraces of the
+   * Throwable argument.
+   * 
+   * 	- The output is a `List` of `SquashException` objects.
+   * 	- Each `SquashException` object in the list represents an exception that occurred
+   * in a particular thread.
+   * 	- The `SquashException` objects contain information about the exception, including
+   * the thread name, the error message, and the stack trace.
+   * 	- The stack trace is represented as an array of `Throwable` objects, which provides
+   * information about the nesting of exceptions.
+   */
   public static List<SquashException> getBacktraces(Throwable error) {
     if (error == null) {
       return null;
@@ -39,6 +65,35 @@ public final class SquashBacktrace {
     return threadList;
   }
 
+  /**
+   * generates a list of `StackElement` objects representing the elements of a stack
+   * trace associated with a `Throwable` object.
+   * 
+   * @param error Throwable object containing the stack trace information to be processed
+   * and returned as a list of StackElement objects.
+   * 
+   * 	- `error`: This is a `Throwable` object that represents an exception or error in
+   * the code. It provides information about the error, such as its class name, file
+   * name, line number, and method name.
+   * 	- `StackTraceElement[]`: This is an array of objects that represent the stack
+   * trace elements of the error. Each element contains information about the location
+   * in the code where the error occurred.
+   * 
+   * @returns a list of `StackElement` objects containing information about each stack
+   * trace element.
+   * 
+   * 	- `List<StackElement>`: The output is a list of StackElement objects representing
+   * the stack trace elements.
+   * 	- `StackElement`: Each element in the list represents a stack frame, consisting
+   * of four attributes:
+   * 	+ `className`: The name of the class that defines the method being executed.
+   * 	+ `fileName`: The name of the file where the method is defined.
+   * 	+ `lineNumber`: The line number of the method definition within the file.
+   * 	+ `methodName`: The name of the method being executed.
+   * 
+   * The list contains elements representing each frame in the stack trace, starting
+   * from the innermost frame and proceeding outward to the outermost frame.
+   */
   private static List<StackElement> getStacktraceArray(Throwable error) {
     List<StackElement> stackElems = new ArrayList<StackElement>();
     for (StackTraceElement element : error.getStackTrace()) {
@@ -50,6 +105,54 @@ public final class SquashBacktrace {
     return stackElems;
   }
 
+  /**
+   * returns a map of instance variables (ivars) of a given Throwable object, including
+   * non-static and non-mockito fields.
+   * 
+   * @param error Throwable object for which the IVARs are to be extracted.
+   * 
+   * 	- `null`: The possible value of `error`, which indicates an absence of any error.
+   * 	- `Field[] fields`: An array of `Field` objects representing the fields of the
+   * deserialized `error`.
+   * 	- `Modifier.isStatic(field.getModifiers())`: A boolean value indicating whether
+   * the field is a static field or not. The function ignores static fields, as they
+   * are not relevant to the task at hand.
+   * 	- `!field.getName().startsWith("CGLIB")`: Another boolean value indicating whether
+   * the field name starts with "CGLIB", which represents mockito stuff in tests. The
+   * function ignores these fields, as they are not part of the main function's functionality.
+   * 	- `field.isAccessible()`: A boolean value indicating whether the field is accessible
+   * or not. If the field is not accessible, it is made accessible before being accessed.
+   * 	- `Object val`: The value of the field.
+   * 
+   * These properties/attributes are used to create a map of field names and corresponding
+   * values, which represents the ivars (instance variables) of the `error` object.
+   * 
+   * @returns a map of class fields with their values for an provided `Throwable` error.
+   * 
+   * 	- The output is a `Map` of `String` to `Object`, where each key is the name of a
+   * field in the `Throwable` class and each value is the value of that field in the
+   * `error` object.
+   * 	- The `Map` is created using a `HashMap` instance, which is initialized with the
+   * `null` value for the keys if the input `Throwable` is null.
+   * 	- The fields are identified using the `getClass().getDeclaredFields()` method,
+   * which returns an array of `Field` objects representing all the public and protected
+   * fields in the class, including static fields.
+   * 	- Each field is checked against a series of conditions before being included in
+   * the `Map`:
+   * 	+ It must not be static (ignored using `Modifier.isStatic(field.getModifiers())`).
+   * 	+ It must not start with "CGLIB" (ignored using a regular expression).
+   * 	+ It must have non-private access modifier (checked using `field.isAccessible()`
+   * and `field.setAccessible(true)` if necessary).
+   * 	- If any of the conditions are false, the field is added to the `Map` with its
+   * name as key and its value as value.
+   * 	- The `catch` block handles any exceptions that occur during field access using
+   * the `IllegalAccessException`. In this case, the field name is printed along with
+   * an exception message.
+   * 
+   * In summary, the `getIvars` function returns a `Map` of fields in the input `Throwable`
+   * object to their corresponding values, excluding static and mockito fields, and
+   * handles any exceptions that may occur during field access.
+   */
   public static Map<String, Object> getIvars(Throwable error) {
     if (error == null) {
       return null;
